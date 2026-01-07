@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Scheduling FCFS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        input, button {
+            margin: 5px;
+            padding: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 6px;
+            text-align: center;
+        }
+
+        #gantt {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .process {
+            border: 1px solid black;
+            padding: 10px;
+            background-color: lightblue;
+            text-align: center;
+        }
+
+        #results {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Simulazione Scheduling FCFS</h1>
+
+<h2>Inserimento processo</h2>
+<input type="text" id="pid" placeholder="ID processo">
+<input type="number" id="arrival" placeholder="Tempo di arrivo">
+<input type="number" id="burst" placeholder="Tempo di burst">
+<button onclick="addProcess()">Aggiungi</button>
+
+<h2>Tabella processi</h2>
+<table id="processTable">
+    <tr>
+        <th>ID</th>
+        <th>Arrivo</th>
+        <th>Burst</th>
+        <th>Attesa</th>
+        <th>Turnaround</th>
+        <th>Risposta</th>
+    </tr>
+</table>
+
+<button onclick="runFCFS()">Esegui FCFS</button>
+
+<h2>Diagramma di Gantt</h2>
+<div id="gantt"></div>
+
+<div id="results"></div>
+
+<script>
+    let processes = [];
+
+    function addProcess() {
+        const id = document.getElementById("pid").value;
+        const arrival = parseInt(document.getElementById("arrival").value);
+        const burst = parseInt(document.getElementById("burst").value);
+
+        if (id === "" || isNaN(arrival) || isNaN(burst)) {
+            alert("Inserisci tutti i dati!");
+            return;
+        }
+
+        processes.push({
+            id: id,
+            arrival: arrival,
+            burst: burst
+        });
+
+        document.getElementById("pid").value = "";
+        document.getElementById("arrival").value = "";
+        document.getElementById("burst").value = "";
+    }
+
+    function runFCFS() {
+        // Ordina per tempo di arrivo
+        processes.sort((a, b) => a.arrival - b.arrival);
+
+        let time = 0;
+        let totalWT = 0;
+        let totalTAT = 0;
+        let totalRT = 0;
+
+        const table = document.getElementById("processTable");
+        table.innerHTML = `
+            <tr>
+                <th>ID</th>
+                <th>Arrivo</th>
+                <th>Burst</th>
+                <th>Attesa</th>
+                <th>Turnaround</th>
+                <th>Risposta</th>
+            </tr>
+        `;
+
+        const gantt = document.getElementById("gantt");
+        gantt.innerHTML = "";
+
+        processes.forEach(p => {
+            if (time < p.arrival) {
+                time = p.arrival;
+            }
+
+            let waiting = time - p.arrival;
+            let response = waiting;
+            let turnaround = waiting + p.burst;
+
+            totalWT += waiting;
+            totalTAT += turnaround;
+            totalRT += response;
+
+            // Tabella
+            let row = table.insertRow();
+            row.insertCell(0).innerText = p.id;
+            row.insertCell(1).innerText = p.arrival;
+            row.insertCell(2).innerText = p.burst;
+            row.insertCell(3).innerText = waiting;
+            row.insertCell(4).innerText = turnaround;
+            row.insertCell(5).innerText = response;
+
+            // Gantt
+            let block = document.createElement("div");
+            block.className = "process";
+            block.style.width = (p.burst * 40) + "px";
+            block.innerText = p.id;
+            gantt.appendChild(block);
+
+            time += p.burst;
+        });
+
+        let n = processes.length;
+        let efficiency = (processes.reduce((s, p) => s + p.burst, 0) / time) * 100;
+
+        document.getElementById("results").innerHTML =
+            "Tempo di attesa medio: " + (totalWT / n).toFixed(2) + "<br>" +
+            "Turnaround medio: " + (totalTAT / n).toFixed(2) + "<br>" +
+            "Tempo di risposta medio: " + (totalRT / n).toFixed(2) + "<br>" +
+            "Efficienza CPU: " + efficiency.toFixed(2) + "%";
+    }
+</script>
+
+</body>
+</html>
