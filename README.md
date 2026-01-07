@@ -1,2 +1,2 @@
 # CodingAndColor
-Autore: Diego SImonetti
+Autore: Diego Simonetti
