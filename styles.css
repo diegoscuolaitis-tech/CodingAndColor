@@ -1,0 +1,10 @@
+body{
+    background-color: rgb(53,97,80);
+    color: rgb(255,255,255);
+    padding: 20px;
+}
+h1 {color: rgb(255,255,255);}
+
+#error{
+    color: rgb(0,0,0);
+}
